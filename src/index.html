@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Acelera ZG - A Jornada de Sandubinha</title>
+    <link rel="stylesheet" href="/src/assets/styles/main.css">
+    <link rel="stylesheet" href="/src/assets/styles/reset.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">RPG Acelera ZG</h1>
+            <h2>A Jornada Épica de Sir Sandubinha!</h2>
+        </div>
+
+        <div class="status-row">
+            <div class="health-bar-container">
+                <img src="/src/assets/images/sandubinha.png" alt="Avatar Sandubinha" class="health-bar-avatar"> <div class="health-bar-info">
+                    <span class="character-name">Sandubinha</span>
+                    <div class="health-bar">
+                        <div class="health-fill" id="playerHealthFill"></div>
+                    </div>
+                    <span class="health-text" id="playerHealthText">5/5</span>
+                </div>
+            </div>
+    
+            <div class="game-stats">
+                <span class="stat">Fase: <span id="currentPhase"></span></span>
+                <br>
+                <br>
+                <span class="stat">Itens: <span id="itemCount">0</span></span>
+            </div>
+        </div>
+
+        <div class="game-content">
+            <div class="story-area" id="storyArea">
+                </div>
+        </div>
+
+        <div class="inventory hidden" id="inventory">
+            <h4> Inventário:</h4>
+            <br>
+            <div id="itemsList"></div>
+            <br>
+            <p><em>Clique nos itens para equipar/desequipar</em></p>
+        </div>
+        <div class="choices" id="choicesArea">
+            </div>
+        </div>
+    <script src="/src/js/main.js"></script>
+</body>
+</html> 
