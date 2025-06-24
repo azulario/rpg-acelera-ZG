@@ -678,6 +678,7 @@ function forgeZGSword() {
 
 function startBattle(enemyId, region) {
     const enemy = enemies[enemyId];
+
     gameState.battleState = {
         enemy: enemy,
         enemyLife: enemy.life,
@@ -696,6 +697,8 @@ function startBattle(enemyId, region) {
         lastRolledNumber: 0 // Para a consequência do Azah Transmissão
     };
 
+
+
     // Log inicial dos números secretos
     gameState.battleState.battleLog.push(`<span style="color: #9c27b0;">Números secretos - Jogador: ${gameState.battleState.playerSecret}, Inimigo: ${gameState.battleState.enemySecret}</span>`);
 
@@ -713,14 +716,17 @@ function showBattleInterface() {
     // Exibição de múltiplos itens equipados
     let equippedItemsHtml = '';
     if (gameState.equippedItems.length > 0) {
-        equippedItemsHtml = '<p>Itens Equipados: ';
-        equippedItemsHtml += gameState.equippedItems.map(itemId => items[itemId].name).join(', ');
-        equippedItemsHtml += '</p>';
+        equippedItemsHtml = '<div class="equipped-items">';
+        equippedItemsHtml += gameState.equippedItems.map(itemId => {
+            const item = items[itemId];
+            return `<img src="${item.image}" alt="${item.name}" title="${item.name}" class="equipped-item-icon">`;
+        }).join('');
+        equippedItemsHtml += '</div>';
     }
 
 
     const storyContent = `
-        <div class="battle-area fade-in">
+        <div class="battle-area">
             <h3>BATALHA ÉPICA</h3>
             
             <div class="battle-stats">
@@ -859,6 +865,7 @@ function playerAttack() {
         // Aplica consequências de itens que afetam o jogador ANTES da rolagem (ex: Colar)
         if (hasColar) {
             gameState.playerLife -= 3;
+            
             battle.battleLog.push(`<span style="color: #f44336;">Você perdeu 3 de vida ao usar o Colar da Estátua Sagrada!</span>`);
             if (gameState.playerLife <= 0) {
                 gameOver("Você morreu ao usar o Colar da Estátua Sagrada...");
@@ -871,16 +878,19 @@ function playerAttack() {
             if (Math.random() < 0.5) { // 50% de chance de falhar o tiro do estilingue
                 battle.battleLog.push(`<span style="color: #ff9800;">O Estilingue Mágico falhou em acertar o alvo!</span>`);
                 battle.estilingueMissCount++;
+
                 if (battle.estilingueMissCount >= 3) {
                     gameState.playerLife -= 1;
+
                     battle.battleLog.push(`<span style="color: #f44336;">O Estilingue Mágico causou -1 de vida devido a erros consecutivos!</span>`);
                     battle.estilingueMissCount = 0;
+
                     if (gameState.playerLife <= 0) {
                         gameOver("Você foi derrotado pelo seu próprio Estilingue Mágico...");
                         return;
                     }
                 }
-                setTimeout(() => enemyAttack(), 1500);
+                setTimeout(() => enemyAttack(), 2500);
                 return;
             }
             battle.estilingueMissCount = 0; // Se o estilingue ACERTOU, reseta o contador de erros.
@@ -906,6 +916,7 @@ function playerAttack() {
 
     // Contar acertos no número secreto
     const hits = rolledNumbers.filter(n => n === battle.enemySecret).length;
+
     let damage = hits * battle.enemySecret;
 
     // Aplicar multiplicador de dano da Espada ZG, se equipada
@@ -916,13 +927,25 @@ function playerAttack() {
 
     battle.battleLog.push(`<strong>⚔️ Sandubinha ataca!</strong> Números: [${rolledNumbers.join(', ')}] (Intervalo: 1-${battle.enemyMaxLife})`);
 
+    const playerAvatar = document.querySelector('.battle-player-group .battle-avatar');
+
+    playerAvatar.classList.add('player-attacking');
+
+    setTimeout(() => playerAvatar.classList.remove('player-attacking'), 800);
+
     if (hits > 0) {
         battle.enemyLife -= damage;
+
+        const enemyAvatar = document.querySelector('.battle-enemy-group .battle-avatar');
+        enemyAvatar.classList.add('taking-damage');
+
+        setTimeout(() => enemyAvatar.classList.remove('taking-damage'), 600);
         if (battle.enemyLife < 0) battle.enemyLife = 0;
+
         battle.battleLog.push(`<span style="color: #4CAF50;">Acertou! ${hits} acerto(s) do ${battle.enemySecret} = ${damage} de dano!</span>`);
 
         if (battle.enemyLife === 0) {
-            playerWinsBattle();
+            setTimeout(() => playerWinsBattle(), 2000);
             return;
         }
     } else {
@@ -940,7 +963,7 @@ function playerAttack() {
     }
 
     if (battle.enemyLife > 0) {
-        setTimeout(() => enemyAttack(), 1500);
+        setTimeout(() => enemyAttack(), 2000);
     }
 }
 
@@ -982,10 +1005,31 @@ function enemyAttack() {
 
     battle.battleLog.push(`<strong>${battle.enemy.name} ataca!</strong> Números: [${rolledNumbers.join(', ')}] (Intervalo: 1-${gameState.maxLife})`);
 
+    setTimeout(() => {
+        const enemyAvatar = document.querySelector('.battle-enemy-group .battle-avatar');
+
+        if (enemyAvatar) {
+            enemyAvatar.classList.add('enemy-attacking');
+            setTimeout(() => {
+                enemyAvatar.classList.remove('enemy-attacking');
+            }, 800);
+        } else {
+            console.warn('enemyAvatar não encontrado!');
+        }
+    }, 100);
+
+
     if (hits > 0) {
         gameState.playerLife -= damage;
         if (gameState.playerLife < 0) gameState.playerLife = 0; // Garante que a vida não fique negativa
         battle.battleLog.push(`<span style="color: #f44336;">Você levou ${damage} de dano! (${hits} acerto(s) do ${battle.playerSecret})</span>`);
+
+        const heroAvatar = document.querySelector('.battle-player-group .battle-avatar');
+        heroAvatar.classList.add('taking-damage');
+
+        setTimeout(() => {
+            heroAvatar.classList.remove('taking-damage');
+        }, 600);
 
         if (gameState.playerLife === 0) {
             gameOver("Você foi derrotado em batalha...");
@@ -1084,6 +1128,7 @@ function fleeBattle() {
 }
 
 function playerWinsBattle() {
+
     const battle = gameState.battleState;
     battle.battleLog.push(`<span class="victory">Você venceu a batalha contra ${battle.enemy.name}!</span>`);
 
